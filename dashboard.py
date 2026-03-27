@@ -1,25 +1,18 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import r2_score, accuracy_score, confusion_matrix
+from sklearn.metrics import r2_score
 import plotly.express as px
 import plotly.graph_objects as go
-import warnings
-warnings.filterwarnings('ignore')
 
-# Page configuration
-st.set_page_config(page_title="Cloud Kitchen Analytics", layout="wide", page_icon="🍽️")
+st.set_page_config(page_title="Cloud Kitchen Analytics", layout="wide")
 
-# Title
-st.title("🍽️ Cloud Kitchen Customer Analytics Dashboard")
-st.markdown("### Data-Driven Insights for Business Growth")
+st.title("Cloud Kitchen Customer Analytics Dashboard")
+st.markdown("Data-Driven Insights for Business Growth")
 st.markdown("---")
 
-# Load dataset
 @st.cache_data
 def load_data():
     data = {
@@ -41,31 +34,26 @@ def load_data():
 
 df = load_data()
 
-# Sidebar
-st.sidebar.title("📊 Navigation")
+st.sidebar.title("Navigation")
 page = st.sidebar.radio("Select Section", 
-                        ["🏠 Overview", 
-                         "📈 Descriptive Analytics", 
-                         "🔍 Diagnostic Analytics", 
-                         "🤖 Predictive Analytics", 
-                         "💡 Prescriptive Analytics"])
+                        ["Overview", 
+                         "Descriptive Analytics", 
+                         "Diagnostic Analytics", 
+                         "Predictive Analytics", 
+                         "Prescriptive Analytics"])
 
-st.sidebar.markdown("---")
-st.sidebar.info("**Cloud Kitchen Analytics Dashboard**\n\nAnalyzing customer behavior, engagement, and value for business growth.")
-
-# ==================== OVERVIEW PAGE ====================
-if page == "🏠 Overview":
-    st.header("🏠 Dashboard Overview")
+if page == "Overview":
+    st.header("Dashboard Overview")
     
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric("Total Customers", len(df))
     with col2:
-        st.metric("Avg Customer Value", f"₹{df['Customer Value'].mean():.2f}")
+        st.metric("Average Customer Value", f"Rs {df['Customer Value'].mean():.2f}")
     with col3:
-        st.metric("Avg Conversion Rate", f"{df['Conversion Rate'].mean():.1f}%")
+        st.metric("Average Conversion Rate", f"{df['Conversion Rate'].mean():.1f}%")
     with col4:
-        st.metric("Total Revenue", f"₹{df['Total Spend'].sum():,.0f}")
+        st.metric("Total Revenue", f"Rs {df['Total Spend'].sum():,.0f}")
     
     st.markdown("---")
     
@@ -78,29 +66,16 @@ if page == "🏠 Overview":
     with col2:
         st.subheader("Top Areas by Customer Value")
         area_value = df.groupby('Area')['Customer Value'].mean().sort_values(ascending=False).head(10)
-        fig = px.bar(x=area_value.values, y=area_value.index, orientation='h', title='Avg Customer Value by Area')
+        fig = px.bar(x=area_value.values, y=area_value.index, orientation='h', title='Average Customer Value by Area')
         st.plotly_chart(fig, use_container_width=True)
-    
-    st.markdown("---")
-    st.subheader("Key Insights")
-    st.markdown("""
-    - **High-value customers** (₹700+) are concentrated in areas like **Khar and Wadala**
-    - **Conversion rate** shows strong correlation with Customer Value
-    - **Engagement metrics** (Clicks, Orders) are key drivers of customer value
-    - **Income segmentation** reveals predictable spending patterns
-    """)
 
-# ==================== DESCRIPTIVE ANALYTICS ====================
-elif page == "📈 Descriptive Analytics":
-    st.header("📈 Descriptive Analytics")
-    st.markdown("Understanding distribution and basic patterns in customer data.")
+elif page == "Descriptive Analytics":
+    st.header("Descriptive Analytics")
     
     col1, col2 = st.columns(2)
     with col1:
         st.subheader("Customer Value Distribution")
         fig = px.histogram(df, x='Customer Value', nbins=25, title='Distribution of Customer Value')
-        fig.add_vline(x=df['Customer Value'].mean(), line_dash="dash", line_color="red", annotation_text=f"Mean: ₹{df['Customer Value'].mean():.2f}")
-        fig.add_vline(x=df['Customer Value'].median(), line_dash="dash", line_color="green", annotation_text=f"Median: ₹{df['Customer Value'].median():.2f}")
         st.plotly_chart(fig, use_container_width=True)
     
     with col2:
@@ -118,20 +93,9 @@ elif page == "📈 Descriptive Analytics":
         st.subheader("Income by Customer Segment")
         fig = px.box(df, x='Customer Segment', y='Income', title='Income Distribution by Segment')
         st.plotly_chart(fig, use_container_width=True)
-    
-    st.markdown("---")
-    st.subheader("Key Findings")
-    st.markdown("""
-    - Customer values range from **₹133 to ₹1,044**, showing significant variation
-    - **33% Low Income**, **34% Medium Income**, **33% High Income** customers
-    - Engagement rates average **2.5**, top customers achieve >3.0
-    - Conversion rates average **24%**, high-value customers convert at >30%
-    """)
 
-# ==================== DIAGNOSTIC ANALYTICS ====================
-elif page == "🔍 Diagnostic Analytics":
-    st.header("🔍 Diagnostic Analytics")
-    st.markdown("Exploring relationships and drivers of customer behavior.")
+elif page == "Diagnostic Analytics":
+    st.header("Diagnostic Analytics")
     
     st.subheader("Correlation Analysis")
     numeric_cols = ['Age', 'Income', 'Visits', 'Clicks', 'Orders', 'Average Order Value', 'Total Spend', 'Engagement Rate', 'Conversion Rate', 'Customer Value']
@@ -142,86 +106,41 @@ elif page == "🔍 Diagnostic Analytics":
     col1, col2 = st.columns(2)
     with col1:
         st.subheader("Clicks vs Customer Value")
-        fig = px.scatter(df, x='Clicks', y='Customer Value', color='Customer Segment', size='Orders', title='Clicks vs Customer Value')
+        fig = px.scatter(df, x='Clicks', y='Customer Value', color='Customer Segment', title='Clicks vs Customer Value')
         st.plotly_chart(fig, use_container_width=True)
     
     with col2:
         st.subheader("Income vs Customer Value")
-        fig = px.scatter(df, x='Income', y='Customer Value', color='Customer Segment', trendline='ols', title='Income vs Customer Value')
+        fig = px.scatter(df, x='Income', y='Customer Value', color='Customer Segment', title='Income vs Customer Value')
         st.plotly_chart(fig, use_container_width=True)
-    
-    st.markdown("---")
-    st.subheader("Key Findings")
-    st.markdown("""
-    - **Clicks** show strongest correlation with Customer Value (r = 0.85)
-    - **Income** and **Customer Value** have moderate correlation (r = 0.62)
-    - **Khar and Wadala** areas have highest average customer value
-    - **Engagement Rate** correlates strongly with Conversion Rate (r = 0.71)
-    """)
 
-# ==================== PREDICTIVE ANALYTICS ====================
-elif page == "🤖 Predictive Analytics":
-    st.header("🤖 Predictive Analytics")
-    st.markdown("Machine learning models to predict customer outcomes.")
+elif page == "Predictive Analytics":
+    st.header("Predictive Analytics")
     
     feature_cols = ['Age', 'Income', 'Visits', 'Clicks', 'Orders', 'Average Order Value', 'Engagement Rate']
     X = df[feature_cols]
     y_value = df['Customer Value']
-    y_conversion = (df['Conversion Rate'] > df['Conversion Rate'].median()).astype(int)
     
-    X_train, X_test, y_train_value, y_test_value = train_test_split(X, y_value, test_size=0.2, random_state=42)
-    X_train_c, X_test_c, y_train_c, y_test_c = train_test_split(X, y_conversion, test_size=0.2, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y_value, test_size=0.2, random_state=42)
     
     rf_reg = RandomForestRegressor(n_estimators=100, random_state=42)
-    rf_reg.fit(X_train, y_train_value)
-    y_pred_value = rf_reg.predict(X_test)
-    r2 = r2_score(y_test_value, y_pred_value)
+    rf_reg.fit(X_train, y_train)
+    y_pred = rf_reg.predict(X_test)
+    r2 = r2_score(y_test, y_pred)
     
-    rf_clf = RandomForestClassifier(n_estimators=100, random_state=42)
-    rf_clf.fit(X_train_c, y_train_c)
-    y_pred_c = rf_clf.predict(X_test_c)
-    accuracy = accuracy_score(y_test_c, y_pred_c)
+    st.metric("Model R2 Score", f"{r2:.3f}")
     
-    col1, col2 = st.columns(2)
-    with col1:
-        st.subheader("Customer Value Prediction")
-        st.metric("Model R² Score", f"{r2:.3f}")
-        fig = px.scatter(x=y_test_value, y=y_pred_value, title='Actual vs Predicted Customer Value')
-        fig.add_trace(go.Scatter(x=[y_test_value.min(), y_test_value.max()], y=[y_test_value.min(), y_test_value.max()], mode='lines', name='Perfect Prediction', line=dict(color='red', dash='dash')))
-        st.plotly_chart(fig, use_container_width=True)
+    fig = px.scatter(x=y_test, y=y_pred, title='Actual vs Predicted Customer Value')
+    fig.add_trace(go.Scatter(x=[y_test.min(), y_test.max()], y=[y_test.min(), y_test.max()], mode='lines', name='Perfect Prediction', line=dict(color='red', dash='dash')))
+    st.plotly_chart(fig, use_container_width=True)
     
-    with col2:
-        st.subheader("Conversion Rate Prediction")
-        st.metric("Model Accuracy", f"{accuracy:.2%}")
-        cm = confusion_matrix(y_test_c, y_pred_c)
-        fig = px.imshow(cm, text_auto=True, aspect="auto", title='Confusion Matrix', labels=dict(x="Predicted", y="Actual"))
-        st.plotly_chart(fig, use_container_width=True)
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        st.subheader("Feature Importance - Customer Value")
-        importance_value = pd.DataFrame({'Feature': feature_cols, 'Importance': rf_reg.feature_importances_}).sort_values('Importance', ascending=True)
-        fig = px.bar(importance_value, x='Importance', y='Feature', orientation='h', title='What drives Customer Value?')
-        st.plotly_chart(fig, use_container_width=True)
-    
-    with col2:
-        st.subheader("Feature Importance - Conversion Rate")
-        importance_conv = pd.DataFrame({'Feature': feature_cols, 'Importance': rf_clf.feature_importances_}).sort_values('Importance', ascending=True)
-        fig = px.bar(importance_conv, x='Importance', y='Feature', orientation='h', title='What drives Conversion Rate?')
-        st.plotly_chart(fig, use_container_width=True)
-    
-    st.markdown("---")
-    st.subheader("Key Findings")
-    st.markdown(f"""
-    - **Customer Value Model**: Explains {r2:.1%} of variance in customer value
-    - **Top Predictors**: Clicks and Orders are most important features
-    - **Conversion Model**: Identifies high-conversion customers {accuracy:.1%} of the time
-    """)
+    st.subheader("Feature Importance")
+    importance_value = pd.DataFrame({'Feature': feature_cols, 'Importance': rf_reg.feature_importances_}).sort_values('Importance', ascending=True)
+    fig = px.bar(importance_value, x='Importance', y='Feature', orientation='h', title='What drives Customer Value?')
+    st.plotly_chart(fig, use_container_width=True)
 
-# ==================== PRESCRIPTIVE ANALYTICS ====================
 else:
-    st.header("💡 Prescriptive Analytics")
-    st.markdown("What-if scenarios and actionable recommendations.")
+    st.header("Prescriptive Analytics")
     
     feature_cols = ['Age', 'Income', 'Visits', 'Clicks', 'Orders', 'Average Order Value', 'Engagement Rate']
     X = df[feature_cols]
@@ -233,7 +152,8 @@ else:
     baseline = df[feature_cols].mean().values
     baseline_value = model.predict([baseline])[0]
     
-    st.subheader("🎯 What-If Analysis")
+    st.subheader("What-If Analysis")
+    
     col1, col2 = st.columns(2)
     with col1:
         clicks_change = st.slider("Clicks Change (%)", -50, 100, 0, 5)
@@ -252,28 +172,26 @@ else:
     
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric("Baseline Value", f"₹{baseline_value:.2f}")
+        st.metric("Baseline Value", f"Rs {baseline_value:.2f}")
     with col2:
-        st.metric("New Value", f"₹{scenario_value:.2f}", f"₹{scenario_value - baseline_value:.2f}")
+        st.metric("New Value", f"Rs {scenario_value:.2f}")
     with col3:
         st.metric("Improvement", f"{improvement:.1f}%")
     
-    st.subheader("📊 Recommendations by Segment")
+    st.subheader("Recommendations by Segment")
     col1, col2 = st.columns(2)
     with col1:
-        st.markdown("**🟢 Low Value Customers (< ₹300)**")
-        st.markdown("- Send personalized discount offers\n- Implement loyalty program\n- Email re-engagement campaigns")
-        st.markdown("**🟡 Medium Value Customers (₹300-700)**")
-        st.markdown("- Upsell premium combos\n- Introduce subscription model\n- Cross-sell complementary items")
+        st.markdown("**Low Value Customers (Below Rs 300)**")
+        st.markdown("- Send personalized discount offers")
+        st.markdown("- Implement loyalty program")
+        st.markdown("- Email re-engagement campaigns")
+        st.markdown("")
+        st.markdown("**Medium Value Customers (Rs 300 to 700)**")
+        st.markdown("- Upsell premium combos")
+        st.markdown("- Introduce subscription model")
+        st.markdown("- Cross-sell complementary items")
     with col2:
-        st.markdown("**🔴 High Value Customers (> ₹700)**")
-        st.markdown("- Exclusive loyalty rewards\n- VIP early access\n- Personalized chef recommendations")
-    
-    st.markdown("---")
-    st.markdown("### 💡 Strategic Recommendations")
-    st.markdown("""
-    1. **Focus on increasing Clicks**: 20% increase yields ~8-10% improvement in customer value
-    2. **Geographic Targeting**: Prioritize marketing in high-value areas (Khar, Wadala, Bandra)
-    3. **Engagement Optimization**: Customers with Engagement Rate > 3.0 show 40% higher conversion
-    4. **Retention Strategy**: High-value customers generate 3x more revenue
-    """)
+        st.markdown("**High Value Customers (Above Rs 700)**")
+        st.markdown("- Exclusive loyalty rewards")
+        st.markdown("- VIP early access")
+        st.markdown("- Personalized chef recommendations")
